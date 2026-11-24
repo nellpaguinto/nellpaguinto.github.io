@@ -1,11 +1,11 @@
-# Deployment Guide: `https://nisynn.github.io/`
+# Deployment Guide: `https://nellpaguinto.github.io/`
 
-Hosted on GitHub Pages (`nisynn/nisynn.github.io`) and deployed automatically from `main` via GitHub Actions.
+Hosted on GitHub Pages (`nellpaguinto/nellpaguinto.github.io`) and deployed automatically from `main` via GitHub Actions.
 
 ## Live Architecture
 
-- **Production URL:** `https://nisynn.github.io/`
-- **Repository:** `https://github.com/nisynn/nisynn.github.io`
+- **Production URL:** `https://nellpaguinto.github.io/`
+- **Repository:** `https://github.com/nellpaguinto/nellpaguinto.github.io`
 - **Build & Gate:** `scripts/build.py` outputs `dist/` and `scripts/verify.py` gates every PR and push.
 - **Workflows:**
   - `.github/workflows/checks.yml`: Runs build and verification checks on pull requests to `main`.
@@ -27,7 +27,7 @@ python scripts/verify.py
 python -m http.server 8080 --directory dist
 ```
 
-4. Review `git status` and `git diff`, commit, and push to `main`. `.github/workflows/pages.yml` builds, runs the verification gate, and updates `https://nisynn.github.io/` automatically.
+4. Review `git status` and `git diff`, commit, and push to `main`. `.github/workflows/pages.yml` builds, runs the verification gate, and updates `https://nellpaguinto.github.io/` automatically.
 
 ## Optional: Attaching a Custom Domain Later
 
@@ -40,6 +40,6 @@ If you decide to attach a custom domain (for example, `.me`, `.dev`, or `.com`) 
    - Remove default parking/redirect records on `@` and `www`.
    - Add the four GitHub Pages `A` records for `@`: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
    - Optionally add the four `AAAA` records for `@`: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`.
-   - Add one `CNAME` record for `www` pointing to `nisynn.github.io`.
+   - Add one `CNAME` record for `www` pointing to `nellpaguinto.github.io`.
    - Keep any GitHub domain verification `TXT` record if requested.
 5. After DNS propagates, enable **Enforce HTTPS** in GitHub Pages settings.
