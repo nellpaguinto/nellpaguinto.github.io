@@ -1,0 +1,35 @@
+# Generated build output
+dist/
+site/
+_site/
+
+# Local drafts and scratch work
+drafts/
+scratch/
+tmp/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS and editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# Environment files
+.env
+.env.*
+
+# Unused local raw source files (kept locally, excluded from public repo)
+assets/img/me-Jacket-2.jpg
+assets/img/IMG_20260211_011740 (1).jpg
+assets/img/ENVIRONMENT_RENDER-2.jpg
+assets/img/KulturaQuest_GameLogo.png
+assets/img/weedsout-logo.png
+assets/img/me-cutout.webp
