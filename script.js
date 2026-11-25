@@ -3,7 +3,9 @@
   const heroCanopy = document.getElementById("heroCanopy");
 
   document.querySelectorAll("img").forEach((img) => {
-    img.setAttribute("draggable", "false");
+    if (img.getAttribute("draggable") !== "false") {
+      img.setAttribute("draggable", "false");
+    }
   });
 
   document
@@ -97,13 +99,27 @@
 
   if (navTargets.length) {
     let navRafPending = false;
+    let navMeasureNeeded = true;
     let pinnedNavId = null;
+    let cachedHeaderHeight = 73;
+    let cachedDocHeight = 0;
+
+    const measureNavLayout = () => {
+      navMeasureNeeded = false;
+      cachedHeaderHeight = siteHeader ? siteHeader.offsetHeight : 73;
+      cachedDocHeight = document.documentElement.scrollHeight;
+      navTargets.forEach((item) => {
+        item.top = item.section.offsetTop;
+      });
+    };
 
     const updateActiveNav = () => {
       navRafPending = false;
-      const headerHeight = siteHeader ? siteHeader.offsetHeight : 73;
-      const scrollMarker = window.scrollY + headerHeight + window.innerHeight * 0.42;
-      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8;
+      if (navMeasureNeeded || !cachedDocHeight) {
+        measureNavLayout();
+      }
+      const scrollMarker = window.scrollY + cachedHeaderHeight + window.innerHeight * 0.42;
+      const atBottom = window.innerHeight + window.scrollY >= cachedDocHeight - 8;
 
       let activeId = null;
       if (pinnedNavId) {
@@ -112,7 +128,7 @@
         activeId = "contact";
       } else {
         for (const item of navTargets) {
-          if (item.section.offsetTop <= scrollMarker) {
+          if (item.top <= scrollMarker) {
             activeId = item.id;
           }
         }
@@ -149,11 +165,11 @@
 
         if (item.id === "background") {
           e.preventDefault();
-          const headerHeight = siteHeader ? siteHeader.offsetHeight : 73;
-          const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          measureNavLayout();
+          const maxScroll = Math.max(0, cachedDocHeight - window.innerHeight);
           const clearanceFromBottom = window.innerWidth <= 680 ? 140 : 220;
           const sectionTop = item.section.getBoundingClientRect().top + window.scrollY;
-          const defaultTop = Math.max(0, sectionTop - headerHeight);
+          const defaultTop = Math.max(0, sectionTop - cachedHeaderHeight);
           const targetY = Math.max(0, Math.min(defaultTop, Math.max(0, maxScroll - clearanceFromBottom)));
           const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           window.scrollTo({ top: targetY, behavior: reducedMotion ? "auto" : "smooth" });
@@ -186,9 +202,15 @@
       }
     });
 
-    updateActiveNav();
+    const onNavLayoutChange = () => {
+      navMeasureNeeded = true;
+      requestNavUpdate();
+    };
+
+    requestNavUpdate();
     window.addEventListener("scroll", requestNavUpdate, { passive: true });
-    window.addEventListener("resize", requestNavUpdate);
+    window.addEventListener("resize", onNavLayoutChange);
+    window.addEventListener("load", onNavLayoutChange);
   }
 
   // Single-active-video playback manager (hero loop pause + YouTube API mutual exclusion)
