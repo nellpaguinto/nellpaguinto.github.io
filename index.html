@@ -32,8 +32,8 @@
       </a>
 
       <div class="header-context" aria-hidden="true">
-        <img id="ctxLogoKq" class="ctx-logo" src="assets/img/kq-logo.webp" alt="">
-        <img id="ctxLogoWo" class="ctx-logo ctx-logo-wo" src="assets/img/weedsout-logo.webp" alt="">
+        <img id="ctxLogoKq" class="ctx-logo" src="assets/img/kq-logo.webp" alt="" draggable="false">
+        <img id="ctxLogoWo" class="ctx-logo ctx-logo-wo" src="assets/img/weedsout-logo.webp" alt="" draggable="false">
       </div>
 
       <button
@@ -63,7 +63,7 @@
         <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/kq-landmarks.webp">
           <source src="assets/img/kulturaLoop.mp4" type="video/mp4">
         </video>
-        <img class="hero-fallback" src="assets/img/kq-landmarks.webp" alt="" width="1920" height="1080">
+        <img class="hero-fallback" src="assets/img/kq-landmarks.webp" alt="" width="1920" height="1080" draggable="false">
         <div class="hero-scrim"></div>
       </div>
 
@@ -103,7 +103,7 @@
           <div class="kq-split">
             <div class="kq-info">
               <div class="project-emblem">
-                <img src="assets/img/kq-logo.webp" alt="KulturaQuest" class="kq-logo" width="420" height="139">
+                <img src="assets/img/kq-logo.webp" alt="KulturaQuest" class="kq-logo" width="420" height="139" draggable="false">
               </div>
               <div class="kq-copy">
                 <h2 class="sr-only">KulturaQuest</h2>
@@ -122,7 +122,8 @@
             <div class="kq-video-card">
               <div class="video-frame">
                 <iframe
-                  src="https://www.youtube-nocookie.com/embed/uhRj6BiGLUQ?rel=0"
+                  id="ytKqTrailer"
+                  src="https://www.youtube-nocookie.com/embed/uhRj6BiGLUQ?rel=0&enablejsapi=1"
                   title="KulturaQuest Trailer"
                   loading="lazy"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -141,7 +142,7 @@
             <div class="carousel-stage">
               <div class="carousel-viewport">
                 <button type="button" class="frame-trigger" id="kqCarouselTrigger" data-cinema-index="0">
-                  <img id="kqCarouselImg" src="assets/img/kq-exploration.webp" alt="KulturaQuest third-person exploration" width="1440" height="810">
+                  <img id="kqCarouselImg" src="assets/img/kq-exploration.webp" alt="KulturaQuest third-person exploration" width="1440" height="810" draggable="false">
                 </button>
 
                 <button type="button" class="carousel-arrow carousel-arrow-prev" id="kqPrevBtn" aria-label="Previous screenshot">
@@ -154,6 +155,7 @@
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
+                <span class="media-loader" id="kqCarouselLoader" aria-live="polite" hidden>Loading...</span>
               </div>
 
               <div class="carousel-overlay">
@@ -167,7 +169,8 @@
         <article id="weedsout" class="wo-showcase wo--flipped">
           <div class="video-frame">
             <iframe
-              src="https://www.youtube-nocookie.com/embed/NeNk38zZwaM?rel=0"
+              id="ytWoGameplay"
+              src="https://www.youtube-nocookie.com/embed/NeNk38zZwaM?rel=0&enablejsapi=1"
               title="WeedsOut! Gameplay"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -176,7 +179,7 @@
 
           <div class="wo-info">
             <div class="project-emblem wo-emblem">
-              <img src="assets/img/weedsout-logo.webp" alt="WeedsOut!" class="wo-logo" width="336" height="200" loading="lazy">
+              <img src="assets/img/weedsout-logo.webp" alt="WeedsOut!" class="wo-logo" width="336" height="200" loading="lazy" draggable="false">
             </div>
             <div class="wo-copy">
               <h3 class="sr-only">WeedsOut!</h3>
@@ -200,17 +203,17 @@
         <div class="gallery-grid">
           <figure class="art-card">
             <button type="button" class="art-trigger" data-art-index="0">
-              <img class="img-top-focus" src="assets/img/3d-sss-bust.webp" alt="Stylized 3D character render with subsurface scattering" width="1400" height="1400" loading="lazy">
+              <img class="img-top-focus" src="assets/img/3d-sss-bust.webp" alt="Stylized 3D character render with subsurface scattering" width="1400" height="1400" loading="lazy" draggable="false">
             </button>
             <figcaption class="art-meta">
-              <span class="art-title">Stylized Character Study</span>
+              <span class="art-title">Diwatres - Character Concept</span>
               <span class="art-sub">Subsurface scattering &amp; environment · Autodesk Maya</span>
             </figcaption>
           </figure>
 
           <figure class="art-card">
             <button type="button" class="art-trigger" data-art-index="1">
-              <img src="assets/img/3d-chess-split.webp" alt="Chess Pieces Study diagonal split combining refraction and studio lighting renders" width="1600" height="900" loading="lazy">
+              <img src="assets/img/3d-chess-split.webp" alt="Chess Pieces Study diagonal split combining refraction and studio lighting renders" width="1600" height="900" loading="lazy" draggable="false">
             </button>
             <figcaption class="art-meta">
               <span class="art-title">Chess Pieces Study</span>
@@ -220,17 +223,17 @@
 
           <figure class="art-card">
             <button type="button" class="art-trigger" data-art-index="2">
-              <img src="assets/img/3d-lab-interior.webp" alt="3D interior render of a computer laboratory classroom" width="1600" height="900" loading="lazy">
+              <img src="assets/img/3d-lab-interior.webp" alt="3D interior render of a computer laboratory classroom" width="1600" height="900" loading="lazy" draggable="false">
             </button>
             <figcaption class="art-meta">
-              <span class="art-title">Computer Laboratory Interior</span>
-              <span class="art-sub">Architectural modeling &amp; lighting · Autodesk Maya</span>
+              <span class="art-title">Computer Laboratory Replica</span>
+              <span class="art-sub">Interior modeling &amp; lighting · Autodesk Maya</span>
             </figcaption>
           </figure>
 
           <figure class="art-card">
             <button type="button" class="art-trigger" data-art-index="3">
-              <img src="assets/img/3d-still-render.webp" alt="Warm interior 3D render with glass shading and cloth simulation" width="1600" height="900" loading="lazy">
+              <img src="assets/img/3d-still-render.webp" alt="Warm interior 3D render with glass shading and cloth simulation" width="1600" height="900" loading="lazy" draggable="false">
             </button>
             <figcaption class="art-meta">
               <span class="art-title">Interior Still Life</span>
@@ -411,7 +414,8 @@
       </svg>
     </button>
     <figure class="cinema-stage">
-      <img id="cinemaImg" src="" alt="">
+      <img id="cinemaImg" src="" alt="" draggable="false">
+      <span class="media-loader" id="cinemaLoader" aria-live="polite" hidden>Loading...</span>
       <figcaption class="cinema-caption" id="cinemaCaption"></figcaption>
     </figure>
   </div>
@@ -433,7 +437,8 @@
         </div>
       </div>
       <div class="lightbox-media">
-        <img id="artLightboxImg" src="" alt="">
+        <img id="artLightboxImg" src="" alt="" draggable="false">
+        <span class="media-loader" id="artLoader" aria-live="polite" hidden>Loading...</span>
       </div>
     </div>
   </div>

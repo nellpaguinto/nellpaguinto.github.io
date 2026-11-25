@@ -1,11 +1,19 @@
 (function () {
-  // 1. Personal portrait drag / contextmenu protection
+  // 1. All-image drag / right-click protection (text and links remain selectable)
   const heroCanopy = document.getElementById("heroCanopy");
 
-  document.querySelectorAll(".protected-photo, .brand-slot").forEach((el) => {
-    el.addEventListener("contextmenu", (e) => e.preventDefault());
-    el.addEventListener("dragstart", (e) => e.preventDefault());
+  document.querySelectorAll("img").forEach((img) => {
+    img.setAttribute("draggable", "false");
   });
+
+  document
+    .querySelectorAll(
+      ".protected-photo, .brand-slot, .project-emblem, .carousel-viewport, .art-trigger, .cinema-stage, .lightbox-media"
+    )
+    .forEach((el) => {
+      el.addEventListener("contextmenu", (e) => e.preventDefault());
+      el.addEventListener("dragstart", (e) => e.preventDefault());
+    });
 
   // 2. Scroll-aware top banner: swap motif -> avatar/name as canopy clears header + swap active project logo
   const kqSection = document.getElementById("projects");
@@ -183,6 +191,199 @@
     window.addEventListener("resize", requestNavUpdate);
   }
 
+  // Single-active-video playback manager (hero loop pause + YouTube API mutual exclusion)
+  const heroSection = document.getElementById("hero");
+  const heroVideo = document.querySelector(".hero-video");
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ytIframeIds = ["ytKqTrailer", "ytWoGameplay"];
+  const ytPlayers = new Map();
+  let ytApiRequested = false;
+
+  if ("IntersectionObserver" in window && heroSection && heroVideo && !prefersReducedMotion) {
+    const heroVideoObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            heroVideo.play().catch(() => {});
+          } else {
+            heroVideo.pause();
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+    heroVideoObserver.observe(heroSection);
+  }
+
+  function pauseAllYouTube(exceptId) {
+    ytPlayers.forEach((player, id) => {
+      if (id === exceptId) return;
+      try {
+        if (typeof player.pauseVideo === "function") {
+          player.pauseVideo();
+        }
+      } catch (_err) {
+        // Ignore cross-origin or unready player errors
+      }
+    });
+  }
+
+  function registerYtPlayers() {
+    if (!window.YT || !window.YT.Player) return;
+    ytIframeIds.forEach((id) => {
+      if (ytPlayers.has(id)) return;
+      const frame = document.getElementById(id);
+      if (!frame) return;
+      try {
+        const player = new window.YT.Player(id, {
+          events: {
+            onStateChange: (event) => {
+              if (window.YT && event && event.data === window.YT.PlayerState.PLAYING) {
+                pauseAllYouTube(id);
+                if (heroVideo && !heroVideo.paused) {
+                  heroVideo.pause();
+                }
+              }
+            }
+          }
+        });
+        ytPlayers.set(id, player);
+      } catch (_err) {
+        // Fallback silently if YT script is blocked or iframe is not ready
+      }
+    });
+  }
+
+  function ensureYtApiLoaded() {
+    if (ytApiRequested) {
+      registerYtPlayers();
+      return;
+    }
+    ytApiRequested = true;
+
+    const prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof prevReady === "function") prevReady();
+      registerYtPlayers();
+    };
+
+    if (window.YT && window.YT.Player) {
+      registerYtPlayers();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.async = true;
+    document.head.appendChild(script);
+  }
+
+  ytIframeIds.forEach((id) => {
+    const frame = document.getElementById(id);
+    if (frame) {
+      frame.addEventListener("load", () => {
+        if (window.YT && window.YT.Player) registerYtPlayers();
+      });
+    }
+  });
+
+  if ("IntersectionObserver" in window && kqSection) {
+    const ytTriggerObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          ensureYtApiLoaded();
+          ytTriggerObserver.disconnect();
+        }
+      },
+      { rootMargin: "350px 0px" }
+    );
+    ytTriggerObserver.observe(kqSection);
+  } else {
+    ensureYtApiLoaded();
+  }
+
+  // Image preloading + decode-before-swap + delayed blur/loading pill
+  const decodedSet = new Set();
+  const preloadPromises = new Map();
+
+  function preloadImage(src) {
+    if (!src) return Promise.resolve();
+    if (decodedSet.has(src)) return Promise.resolve();
+    if (preloadPromises.has(src)) return preloadPromises.get(src);
+
+    const p = new Promise((resolve) => {
+      const loaderImg = new Image();
+      const finish = () => {
+        decodedSet.add(src);
+        resolve();
+      };
+      loaderImg.onload = () => {
+        if (typeof loaderImg.decode === "function") {
+          loaderImg.decode().then(finish, finish);
+        } else {
+          finish();
+        }
+      };
+      loaderImg.onerror = () => resolve();
+      loaderImg.src = src;
+    });
+
+    preloadPromises.set(src, p);
+    return p;
+  }
+
+  function swapImageSmooth({ imgEl, loaderEl, src, alt, tokenRef, immediatePreviewSrc }) {
+    if (!imgEl || !src) return;
+    tokenRef.id += 1;
+    const reqId = tokenRef.id;
+    clearTimeout(tokenRef.timer);
+
+    const hideLoader = () => {
+      if (loaderEl) loaderEl.hidden = true;
+    };
+
+    if (decodedSet.has(src)) {
+      imgEl.classList.remove("is-media-loading");
+      hideLoader();
+      if (imgEl.getAttribute("src") === src) {
+        imgEl.alt = alt;
+        return;
+      }
+      if (!prefersReducedMotion) imgEl.classList.add("is-media-swapping");
+      imgEl.src = src;
+      imgEl.alt = alt;
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          imgEl.classList.remove("is-media-swapping");
+        });
+      });
+      return;
+    }
+
+    if (immediatePreviewSrc && !imgEl.getAttribute("src")) {
+      imgEl.src = immediatePreviewSrc;
+      imgEl.alt = alt;
+    } else {
+      imgEl.classList.add("is-media-loading");
+    }
+
+    if (loaderEl) {
+      hideLoader();
+      tokenRef.timer = window.setTimeout(() => {
+        if (tokenRef.id === reqId) loaderEl.hidden = false;
+      }, 180);
+    }
+
+    preloadImage(src).then(() => {
+      if (tokenRef.id !== reqId) return;
+      clearTimeout(tokenRef.timer);
+      hideLoader();
+      imgEl.src = src;
+      imgEl.alt = alt;
+      imgEl.classList.remove("is-media-loading", "is-media-swapping");
+    });
+  }
+
   // 3. KulturaQuest 9-slide dual-resolution carousel (1440w preview + native 1080p cinema view)
   const kqSlides = [
     {
@@ -242,25 +443,59 @@
   ];
 
   const kqImg = document.getElementById("kqCarouselImg");
+  const kqLoader = document.getElementById("kqCarouselLoader");
   const kqCaption = document.getElementById("kqCarouselCaption");
   const kqCount = document.getElementById("kqCarouselCount");
   const kqTrigger = document.getElementById("kqCarouselTrigger");
   const kqPrevBtn = document.getElementById("kqPrevBtn");
   const kqNextBtn = document.getElementById("kqNextBtn");
+  const kqCarousel = document.getElementById("kqCarousel");
   const kqStage = document.querySelector(".carousel-stage");
 
   let kqIndex = 0;
+  const kqSwapToken = { id: 0, timer: null };
+
+  if (kqImg && kqImg.complete && kqImg.naturalWidth > 0) {
+    decodedSet.add(kqSlides[0].preview);
+  }
+
+  function preloadCarouselNeighbors(idx) {
+    const prevIdx = (idx - 1 + kqSlides.length) % kqSlides.length;
+    const nextIdx = (idx + 1) % kqSlides.length;
+    preloadImage(kqSlides[prevIdx].preview);
+    preloadImage(kqSlides[nextIdx].preview);
+  }
+
+  if ("IntersectionObserver" in window && kqCarousel) {
+    const carouselPreloadObs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          preloadCarouselNeighbors(kqIndex);
+          carouselPreloadObs.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+    carouselPreloadObs.observe(kqCarousel);
+  } else {
+    preloadCarouselNeighbors(kqIndex);
+  }
 
   function setKqSlide(idx) {
     kqIndex = (idx + kqSlides.length) % kqSlides.length;
     const s = kqSlides[kqIndex];
-    if (kqImg) {
-      kqImg.src = s.preview;
-      kqImg.alt = s.title;
-    }
     if (kqCaption) kqCaption.textContent = s.caption;
     if (kqCount) kqCount.textContent = kqIndex + 1 + " / " + kqSlides.length;
     if (kqTrigger) kqTrigger.setAttribute("data-cinema-index", String(kqIndex));
+
+    swapImageSmooth({
+      imgEl: kqImg,
+      loaderEl: kqLoader,
+      src: s.preview,
+      alt: s.title,
+      tokenRef: kqSwapToken
+    });
+    preloadCarouselNeighbors(kqIndex);
   }
 
   if (kqPrevBtn) kqPrevBtn.addEventListener("click", () => setKqSlide(kqIndex - 1));
@@ -282,21 +517,38 @@
   // 4. Dedicated Borderless Cinema Lightbox (KulturaQuest Native 1080p)
   const cinemaLightbox = document.getElementById("cinemaLightbox");
   const cinemaImg = document.getElementById("cinemaImg");
+  const cinemaLoader = document.getElementById("cinemaLoader");
   const cinemaCaption = document.getElementById("cinemaCaption");
   const cinemaPrev = document.getElementById("cinemaPrev");
   const cinemaNext = document.getElementById("cinemaNext");
 
   let cinemaIndex = 0;
   let lastCinemaFocus = null;
+  const cinemaSwapToken = { id: 0, timer: null };
+
+  function preloadCinemaNeighbors(idx) {
+    const prevIdx = (idx - 1 + kqSlides.length) % kqSlides.length;
+    const nextIdx = (idx + 1) % kqSlides.length;
+    preloadImage(kqSlides[prevIdx].full);
+    preloadImage(kqSlides[nextIdx].full);
+  }
 
   function renderCinema() {
     const s = kqSlides[cinemaIndex];
-    cinemaImg.src = s.full;
-    cinemaImg.alt = s.title;
     cinemaCaption.textContent = cinemaIndex + 1 + " / " + kqSlides.length + " · " + s.caption;
+    swapImageSmooth({
+      imgEl: cinemaImg,
+      loaderEl: cinemaLoader,
+      src: s.full,
+      alt: s.title,
+      tokenRef: cinemaSwapToken,
+      immediatePreviewSrc: s.preview
+    });
+    preloadCinemaNeighbors(cinemaIndex);
   }
 
   function openCinema(index) {
+    pauseAllYouTube();
     cinemaIndex = index;
     lastCinemaFocus = document.activeElement;
     renderCinema();
@@ -306,6 +558,11 @@
   }
 
   function closeCinema() {
+    cinemaSwapToken.id += 1;
+    clearTimeout(cinemaSwapToken.timer);
+    if (cinemaLoader) cinemaLoader.hidden = true;
+    cinemaImg.classList.remove("is-media-loading", "is-media-swapping");
+    cinemaImg.removeAttribute("src");
     cinemaLightbox.hidden = true;
     cinemaLightbox.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
@@ -342,11 +599,13 @@
   // 5. Dedicated 3D Works Multi-View Lightbox
   const artItems = [
     {
-      title: "Stylized Character Study",
-      caption: "Subsurface scattering skin shader and forest environment render in Autodesk Maya.",
+      title: "Diwatres - Character Concept",
+      caption: "Character concept portrait, pose, environment, turnaround, and props in Autodesk Maya.",
       views: [
         { label: "Portrait", src: "assets/img/3d-sss-bust.webp" },
-        { label: "Environment", src: "assets/img/3d-char-env.webp" }
+        { label: "Pose", src: "assets/img/3d-diwatres-pose.webp" },
+        { label: "Environment", src: "assets/img/3d-char-env.webp" },
+        { label: "Breakdown", src: "assets/img/3d-diwatres-sheet.webp" }
       ],
       activeView: 0
     },
@@ -360,8 +619,8 @@
       activeView: 0
     },
     {
-      title: "Computer Laboratory Interior",
-      caption: "Modular workstation modeling and interior lighting in Autodesk Maya.",
+      title: "Computer Laboratory Replica",
+      caption: "Modular workstation replica and interior lighting in Autodesk Maya.",
       views: [
         { label: "Wide View", src: "assets/img/3d-lab-interior.webp" },
         { label: "Corner View", src: "assets/img/3d-lab-corner.webp" },
@@ -382,6 +641,7 @@
 
   const artLightbox = document.getElementById("artLightbox");
   const artImg = document.getElementById("artLightboxImg");
+  const artLoader = document.getElementById("artLoader");
   const artTitle = document.getElementById("artLightboxTitle");
   const artCaption = document.getElementById("artLightboxCaption");
   const artPrev = document.getElementById("artLightboxPrev");
@@ -390,6 +650,17 @@
 
   let artIndex = 0;
   let lastArtFocus = null;
+  const artSwapToken = { id: 0, timer: null };
+
+  function preloadArtContext(idx) {
+    const item = artItems[idx];
+    (item.views || []).forEach((v) => preloadImage(v.src));
+
+    const prevItem = artItems[(idx - 1 + artItems.length) % artItems.length];
+    const nextItem = artItems[(idx + 1) % artItems.length];
+    preloadImage(prevItem.views[prevItem.activeView || 0].src);
+    preloadImage(nextItem.views[nextItem.activeView || 0].src);
+  }
 
   function renderArtLightbox() {
     const item = artItems[artIndex];
@@ -400,8 +671,15 @@
     const views = item.views || [];
     const viewIdx = item.activeView || 0;
     const currentView = views[viewIdx];
-    artImg.src = currentView.src;
-    artImg.alt = item.title + " (" + currentView.label + ")";
+
+    swapImageSmooth({
+      imgEl: artImg,
+      loaderEl: artLoader,
+      src: currentView.src,
+      alt: item.title + " (" + currentView.label + ")",
+      tokenRef: artSwapToken
+    });
+    preloadArtContext(artIndex);
 
     if (views.length > 1) {
       views.forEach((v, idx) => {
@@ -422,6 +700,7 @@
   }
 
   function openArtLightbox(index) {
+    pauseAllYouTube();
     artIndex = index;
     lastArtFocus = document.activeElement;
     renderArtLightbox();
@@ -431,6 +710,11 @@
   }
 
   function closeArtLightbox() {
+    artSwapToken.id += 1;
+    clearTimeout(artSwapToken.timer);
+    if (artLoader) artLoader.hidden = true;
+    artImg.classList.remove("is-media-loading", "is-media-swapping");
+    artImg.removeAttribute("src");
     artLightbox.hidden = true;
     artLightbox.setAttribute("aria-hidden", "true");
     artSwitch.innerHTML = "";
