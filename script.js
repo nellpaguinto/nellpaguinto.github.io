@@ -8,7 +8,7 @@
   });
 
   // 2. Scroll-aware top banner: swap motif -> avatar/name as canopy clears header + swap active project logo
-  const kqSection = document.getElementById("kulturaquest");
+  const kqSection = document.getElementById("projects");
   const woSection = document.getElementById("weedsout");
   const ctxLogoKq = document.getElementById("ctxLogoKq");
   const ctxLogoWo = document.getElementById("ctxLogoWo");
@@ -46,6 +46,141 @@
 
     projectObserver.observe(kqSection);
     projectObserver.observe(woSection);
+  }
+
+  // Mobile hamburger menu drawer + active-section scroll-spy underline
+  const siteHeader = document.querySelector(".site-header");
+  const navToggle = document.getElementById("navToggle");
+  const primaryNav = document.getElementById("primaryNav");
+  const brandLink = document.querySelector(".brand-slot");
+
+  const setNavOpen = (open) => {
+    if (!navToggle || !primaryNav) return;
+    navToggle.classList.toggle("is-open", open);
+    primaryNav.classList.toggle("is-open", open);
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  if (navToggle && primaryNav) {
+    navToggle.addEventListener("click", () => {
+      setNavOpen(!primaryNav.classList.contains("is-open"));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (primaryNav.classList.contains("is-open") && siteHeader && !siteHeader.contains(e.target)) {
+        setNavOpen(false);
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 680 && primaryNav.classList.contains("is-open")) {
+        setNavOpen(false);
+      }
+    });
+  }
+
+  const navTargets = ["projects", "art3d", "background", "contact"]
+    .map((id) => ({
+      id,
+      section: document.getElementById(id),
+      link: document.querySelector(`.site-nav a[href="#${id}"]`)
+    }))
+    .filter((item) => item.section && item.link);
+
+  if (navTargets.length) {
+    let navRafPending = false;
+    let pinnedNavId = null;
+
+    const updateActiveNav = () => {
+      navRafPending = false;
+      const headerHeight = siteHeader ? siteHeader.offsetHeight : 73;
+      const scrollMarker = window.scrollY + headerHeight + window.innerHeight * 0.42;
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8;
+
+      let activeId = null;
+      if (pinnedNavId) {
+        activeId = pinnedNavId;
+      } else if (atBottom) {
+        activeId = "contact";
+      } else {
+        for (const item of navTargets) {
+          if (item.section.offsetTop <= scrollMarker) {
+            activeId = item.id;
+          }
+        }
+      }
+
+      navTargets.forEach((item) => {
+        const active = item.id === activeId;
+        item.link.classList.toggle("is-active", active);
+        if (active) {
+          item.link.setAttribute("aria-current", "location");
+        } else {
+          item.link.removeAttribute("aria-current");
+        }
+      });
+    };
+
+    const requestNavUpdate = () => {
+      if (navRafPending) return;
+      navRafPending = true;
+      window.requestAnimationFrame(updateActiveNav);
+    };
+
+    const clearPinnedNav = () => {
+      if (!pinnedNavId) return;
+      pinnedNavId = null;
+      requestNavUpdate();
+    };
+
+    navTargets.forEach((item) => {
+      item.link.addEventListener("click", (e) => {
+        pinnedNavId = item.id;
+        setNavOpen(false);
+        updateActiveNav();
+
+        if (item.id === "background") {
+          e.preventDefault();
+          const headerHeight = siteHeader ? siteHeader.offsetHeight : 73;
+          const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          const clearanceFromBottom = window.innerWidth <= 680 ? 140 : 220;
+          const sectionTop = item.section.getBoundingClientRect().top + window.scrollY;
+          const defaultTop = Math.max(0, sectionTop - headerHeight);
+          const targetY = Math.max(0, Math.min(defaultTop, Math.max(0, maxScroll - clearanceFromBottom)));
+          const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          window.scrollTo({ top: targetY, behavior: reducedMotion ? "auto" : "smooth" });
+          if (history.replaceState) {
+            history.replaceState(null, "", "#background");
+          }
+        }
+      });
+    });
+
+    if (brandLink) {
+      brandLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        pinnedNavId = null;
+        setNavOpen(false);
+        const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+        if (history.replaceState) {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+        updateActiveNav();
+      });
+    }
+
+    window.addEventListener("wheel", clearPinnedNav, { passive: true });
+    window.addEventListener("touchmove", clearPinnedNav, { passive: true });
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(e.key)) {
+        clearPinnedNav();
+      }
+    });
+
+    updateActiveNav();
+    window.addEventListener("scroll", requestNavUpdate, { passive: true });
+    window.addEventListener("resize", requestNavUpdate);
   }
 
   // 3. KulturaQuest 9-slide dual-resolution carousel (1440w preview + native 1080p cinema view)
@@ -331,7 +466,7 @@
     });
   }
 
-  // Shared keyboard navigation for whichever modal is open
+  // Shared keyboard navigation for open modals and mobile drawer
   document.addEventListener("keydown", (e) => {
     if (!cinemaLightbox.hidden) {
       if (e.key === "Escape") closeCinema();
@@ -343,6 +478,11 @@
       if (e.key === "Escape") closeArtLightbox();
       if (e.key === "ArrowLeft" && artPrev) artPrev.click();
       if (e.key === "ArrowRight" && artNext) artNext.click();
+      return;
+    }
+    if (e.key === "Escape" && primaryNav && primaryNav.classList.contains("is-open")) {
+      setNavOpen(false);
+      if (navToggle) navToggle.focus();
     }
   });
 })();

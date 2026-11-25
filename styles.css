@@ -205,14 +205,87 @@ body.is-scrolled-past-hero .brand-person {
 }
 
 .site-nav a {
+  position: relative;
+  display: inline-block;
   font-size: 0.94rem;
   color: var(--text-secondary);
   transition: color 0.18s ease;
   white-space: nowrap;
 }
 
-.site-nav a:hover {
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: rgba(224, 163, 74, 0.85);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  pointer-events: none;
+}
+
+.site-nav a:hover,
+.site-nav a.is-active {
   color: var(--text);
+}
+
+.site-nav a.is-active::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.nav-toggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(21, 25, 34, 0.72);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 18px;
+  height: 1.75px;
+  border-radius: 999px;
+  background: var(--text);
+  transition: transform 0.22s ease, opacity 0.18s ease, background-color 0.2s ease;
+}
+
+.nav-toggle:hover,
+.nav-toggle.is-open {
+  border-color: rgba(224, 163, 74, 0.65);
+  background: rgba(224, 163, 74, 0.1);
+}
+
+.nav-toggle:hover .nav-toggle-bar,
+.nav-toggle.is-open .nav-toggle-bar {
+  background: var(--accent);
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(1) {
+  transform: translateY(6.75px) rotate(45deg);
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-6.75px) rotate(-45deg);
 }
 
 /* Shared Typography & Buttons */
@@ -468,6 +541,15 @@ h3 {
 
   .hero-scroll-cue {
     animation: none;
+  }
+
+  .site-nav a::after {
+    transition: none;
+  }
+
+  .nav-toggle-bar,
+  .site-nav {
+    transition: none;
   }
 }
 
@@ -1457,16 +1539,16 @@ h3 {
   }
 
   .header-inner {
-    grid-template-columns: 1fr;
-    gap: 6px;
-    min-height: auto;
-    padding: 10px 0;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    min-height: 60px;
+    padding: 0;
   }
 
   .brand-slot {
     min-width: 0;
     width: 100%;
-    height: 30px;
+    height: 32px;
   }
 
   .brand-motif {
@@ -1478,22 +1560,51 @@ h3 {
     height: 28px;
   }
 
+  .nav-toggle {
+    display: inline-flex;
+    justify-self: end;
+  }
+
   .site-nav {
-    justify-self: stretch;
-    width: 100%;
-    justify-content: space-between;
-    gap: 10px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 16px 16px;
+    background: rgba(13, 15, 19, 0.96);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-strong);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(-8px);
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.22s ease, visibility 0.22s ease;
+  }
+
+  .site-nav.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .site-nav a {
-    font-size: 0.86rem;
+    font-size: 0.98rem;
+    padding: 8px 0;
+  }
+
+  .site-nav a::after {
+    bottom: 3px;
   }
 
   .band {
     padding: 40px 0;
-    scroll-margin-top: 92px;
+    scroll-margin-top: 62px;
   }
 
   .avatar-ring {
