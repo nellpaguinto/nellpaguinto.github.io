@@ -815,7 +815,7 @@ h3 {
 }
 
 .yt-play-btn svg {
-  margin-left: 3px;
+  display: block;
 }
 
 .yt-facade:hover .yt-play-btn,
