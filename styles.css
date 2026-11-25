@@ -615,7 +615,7 @@ h3 {
 
 /* Tighter Open Full-Width Bands */
 .band {
-  padding: 56px 0;
+  padding: 44px 0;
   border-bottom: 1px solid var(--border);
   scroll-margin-top: 73px;
 }
@@ -637,7 +637,7 @@ h3 {
 }
 
 .band-head {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .section-note {
@@ -648,7 +648,7 @@ h3 {
 
 /* KulturaQuest Band */
 .kq-showcase {
-  padding-bottom: 48px;
+  padding-bottom: 36px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -826,9 +826,31 @@ h3 {
   transform: translate(-50%, -50%) scale(1.06);
 }
 
-/* Clean Carousel (Full-Height Faded Edge Zones, No Thumbnails) */
+/* Clean Carousel (Hairline Bridge + Full-Height Faded Edge Zones) */
 .carousel {
-  margin-top: 28px;
+  margin-top: 32px;
+}
+
+.carousel-bridge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.carousel-bridge-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.carousel-bridge-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--border);
 }
 
 .carousel-stage {
@@ -990,7 +1012,7 @@ h3 {
   grid-template-columns: 1.15fr 0.95fr;
   gap: 44px;
   align-items: stretch;
-  padding-top: 48px;
+  padding-top: 36px;
 }
 
 .wo--flipped .video-frame {
@@ -1753,8 +1775,24 @@ h3 {
   }
 
   .band {
-    padding: 40px 0;
+    padding: 32px 0;
     scroll-margin-top: 62px;
+  }
+
+  .band-head {
+    margin-bottom: 18px;
+  }
+
+  .kq-showcase {
+    padding-bottom: 28px;
+  }
+
+  .wo-showcase.wo--flipped {
+    padding-top: 28px;
+  }
+
+  .carousel {
+    margin-top: 24px;
   }
 
   .avatar-ring {
