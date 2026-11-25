@@ -419,6 +419,9 @@ h3 {
 
 .hero-video,
 .hero-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -426,12 +429,23 @@ h3 {
 }
 
 .hero-fallback {
-  display: none;
+  z-index: 0;
+}
+
+.hero-video {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero-video.is-ready {
+  opacity: 1;
 }
 
 .hero-scrim {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: linear-gradient(
     180deg,
     rgba(13, 15, 19, 0) 0%,

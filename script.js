@@ -199,6 +199,20 @@
   const ytPlayers = new Map();
   let ytApiRequested = false;
 
+  if (heroVideo && !prefersReducedMotion) {
+    const revealHeroVideo = () => {
+      window.requestAnimationFrame(() => {
+        heroVideo.classList.add("is-ready");
+      });
+    };
+    if (heroVideo.readyState >= 2) {
+      revealHeroVideo();
+    } else {
+      heroVideo.addEventListener("playing", revealHeroVideo, { once: true });
+      heroVideo.addEventListener("loadeddata", revealHeroVideo, { once: true });
+    }
+  }
+
   if ("IntersectionObserver" in window && heroSection && heroVideo && !prefersReducedMotion) {
     const heroVideoObserver = new IntersectionObserver(
       (entries) => {
