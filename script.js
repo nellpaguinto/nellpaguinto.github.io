@@ -620,7 +620,7 @@
     },
     {
       title: "Computer Laboratory Replica",
-      caption: "Modular workstation replica and interior lighting in Autodesk Maya.",
+      caption: "3D replica of an FEU Tech computer laboratory with lighting passes in Autodesk Maya.",
       views: [
         { label: "Wide", src: "assets/img/3d-lab-interior.webp" },
         { label: "Corner", src: "assets/img/3d-lab-corner.webp" },

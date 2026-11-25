@@ -624,11 +624,12 @@ h3 {
 
 .kq-info .project-emblem {
   flex: 1 1 auto;
-  padding: 8px 0 20px;
+  padding: 4px 0 16px;
+  margin-bottom: 16px;
 }
 
 .kq-logo {
-  height: 136px;
+  height: clamp(138px, 11vw, 156px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
