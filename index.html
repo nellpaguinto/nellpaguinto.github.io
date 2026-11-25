@@ -18,6 +18,7 @@
   <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -120,13 +121,20 @@
 
             <div class="kq-video-card">
               <div class="video-frame">
-                <iframe
-                  id="ytKqTrailer"
-                  src="https://www.youtube-nocookie.com/embed/uhRj6BiGLUQ?rel=0&enablejsapi=1"
-                  title="KulturaQuest Trailer"
-                  loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen></iframe>
+                <button
+                  type="button"
+                  class="yt-facade"
+                  data-yt-id="uhRj6BiGLUQ"
+                  data-yt-iframe-id="ytKqTrailer"
+                  data-yt-title="KulturaQuest Trailer"
+                  aria-label="Play KulturaQuest Trailer">
+                  <img src="assets/img/yt-kq-thumb.webp" alt="KulturaQuest Trailer video thumbnail" width="1280" height="720" loading="lazy" draggable="false">
+                  <span class="yt-play-btn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+                      <polygon points="8,5 19,12 8,19"></polygon>
+                    </svg>
+                  </span>
+                </button>
               </div>
               <div class="video-meta-bar">
                 <span class="video-meta-label">Gameplay Trailer</span>
@@ -167,13 +175,20 @@
 
         <article id="weedsout" class="wo-showcase wo--flipped">
           <div class="video-frame">
-            <iframe
-              id="ytWoGameplay"
-              src="https://www.youtube-nocookie.com/embed/NeNk38zZwaM?rel=0&enablejsapi=1"
-              title="WeedsOut! Gameplay"
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen></iframe>
+            <button
+              type="button"
+              class="yt-facade"
+              data-yt-id="NeNk38zZwaM"
+              data-yt-iframe-id="ytWoGameplay"
+              data-yt-title="WeedsOut! Gameplay"
+              aria-label="Play WeedsOut! Gameplay">
+              <img src="assets/img/yt-wo-thumb.webp" alt="WeedsOut! Gameplay video thumbnail" width="1280" height="720" loading="lazy" draggable="false">
+              <span class="yt-play-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+                  <polygon points="8,5 19,12 8,19"></polygon>
+                </svg>
+              </span>
+            </button>
           </div>
 
           <div class="wo-info">
@@ -441,7 +456,5 @@
       </div>
     </div>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>

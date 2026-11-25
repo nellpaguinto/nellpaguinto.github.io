@@ -8,7 +8,7 @@
 
   document
     .querySelectorAll(
-      ".protected-photo, .brand-slot, .project-emblem, .carousel-viewport, .art-trigger, .cinema-stage, .lightbox-media"
+      ".protected-photo, .brand-slot, .project-emblem, .carousel-viewport, .art-trigger, .cinema-stage, .lightbox-media, .yt-facade"
     )
     .forEach((el) => {
       el.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -292,29 +292,39 @@
     document.head.appendChild(script);
   }
 
-  ytIframeIds.forEach((id) => {
-    const frame = document.getElementById(id);
-    if (frame) {
-      frame.addEventListener("load", () => {
-        if (window.YT && window.YT.Player) registerYtPlayers();
-      });
-    }
-  });
+  function mountYouTubeFacade(btn) {
+    const videoId = btn.getAttribute("data-yt-id");
+    const iframeId = btn.getAttribute("data-yt-iframe-id");
+    const title = btn.getAttribute("data-yt-title") || "YouTube Video";
+    if (!videoId || !iframeId) return;
 
-  if ("IntersectionObserver" in window && kqSection) {
-    const ytTriggerObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          ensureYtApiLoaded();
-          ytTriggerObserver.disconnect();
-        }
-      },
-      { rootMargin: "350px 0px" }
-    );
-    ytTriggerObserver.observe(kqSection);
-  } else {
+    pauseAllYouTube(iframeId);
+    if (heroVideo && !heroVideo.paused) {
+      heroVideo.pause();
+    }
+
+    const frame = document.createElement("iframe");
+    frame.id = iframeId;
+    frame.src =
+      "https://www.youtube-nocookie.com/embed/" +
+      encodeURIComponent(videoId) +
+      "?rel=0&autoplay=1&enablejsapi=1";
+    frame.title = title;
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    frame.allowFullscreen = true;
+    frame.addEventListener("load", () => {
+      if (window.YT && window.YT.Player) {
+        registerYtPlayers();
+      }
+    });
+
+    btn.replaceWith(frame);
     ensureYtApiLoaded();
   }
+
+  document.querySelectorAll(".yt-facade").forEach((btn) => {
+    btn.addEventListener("click", () => mountYouTubeFacade(btn));
+  });
 
   // Image preloading + decode-before-swap + delayed blur/loading pill
   const decodedSet = new Set();
