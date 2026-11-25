@@ -622,9 +622,10 @@
       title: "Computer Laboratory Replica",
       caption: "Modular workstation replica and interior lighting in Autodesk Maya.",
       views: [
-        { label: "Wide View", src: "assets/img/3d-lab-interior.webp" },
-        { label: "Corner View", src: "assets/img/3d-lab-corner.webp" },
-        { label: "Desk Close-Up", src: "assets/img/3d-lab-desk.webp" }
+        { label: "Wide", src: "assets/img/3d-lab-interior.webp" },
+        { label: "Corner", src: "assets/img/3d-lab-corner.webp" },
+        { label: "Close-Up", src: "assets/img/3d-lab-desk.webp" },
+        { label: "Night", src: "assets/img/3d-lab-night.webp" }
       ],
       activeView: 0
     },
